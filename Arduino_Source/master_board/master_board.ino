@@ -24,6 +24,7 @@ IRSensor backLeftSensor = IRSensor();
 UltraSonicSensor frontSensor = UltraSonicSensor(); // needs numbers
 UltraSonicSensor backSensor = UltraSonicSensor();
 int flag = 0;
+//
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 * * * * * * * * * * * * * * * * * * * * * * * *
 * IR Sensor Counters (used to
@@ -56,6 +57,7 @@ int backLeftSensorValue;
 long sensorsum6 = 0;
 int mean6 = 0;
 int lastmean6 = 0;
+//
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 * * * * * * * * * * * * * * * * * * * * * * * *
 * Initialization variables
@@ -76,7 +78,7 @@ void setup(){    //modified by Rusty 9/5/16
 
 	//*******FIXES***********//
 	// Probed board pins and made pin designations match pin A0-5, 2, & 3
- 
+	//
 	Serial.begin(9600);
 	Wire.begin();
 	start = 0; // when first uploaded, queues initialization phase before reading
@@ -94,9 +96,6 @@ void setup(){    //modified by Rusty 9/5/16
 	* A5 = Right
 	*  2 = US Back
 	*  3 = US Front
-	//
-	CDR:
-	WSTF Sniffer 3.0 May 13, 2016 37
 	*/
 	//set desired Pin numbers to IR Pins
 	frontRightSensor.setIRPin(A0);
