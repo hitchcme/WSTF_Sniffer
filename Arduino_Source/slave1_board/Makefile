@@ -1,6 +1,6 @@
 ARDUINO_DIR   = /usr/share/arduino
 BOARD_TAG = uno
-ARDUINO_PORT = /dev/serial/by-id/usb-Arduino__www.arduino.cc__0043_55332333230351014090-if00
+ARDUINO_PORT = /dev/serial/by-id/usb-Arduino__www.arduino.cc__0043_A41363730373514051E2-if00 
 
 ARDUINO_LIBS = Wire SPI SD SoftwareSerial
 USR_LIB_PATH = ~/sketchbook/libraries
