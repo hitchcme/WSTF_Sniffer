@@ -1,1 +1,2 @@
-Arduino_Souce/*/build-uno/*
+Arduino_Source/\*/build-uno/\*
+*.swp
