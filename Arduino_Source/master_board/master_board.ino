@@ -13,7 +13,7 @@
 char c;
 /* IR Sensors */
 // initialize Infrared Sensors
-IRSensor frontRightSensor = IRSensor(); // BACK RIGHT
+IRSensor frontRightSensor = IRSensor();
 IRSensor frontLeftSensor = IRSensor();
 IRSensor rightSensor = IRSensor();
 IRSensor leftSensor = IRSensor();
@@ -31,7 +31,7 @@ calculate mean distance) (Per sensor)
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 * * * * * * * * * * * * * * * * * * * * * * * */
 int n = 1; // counter
-int decision = 0; // decision variable that determines direction after periferal reading
+int decision = 0; // decision variable that determines direction after peripheral reading
 int frontRightSensorValue;
 long sensorsum = 0;
 int mean = 0;
@@ -66,45 +66,49 @@ int start;
 
 void resetSensorSums();
 void executeDecision(int n);
-int readFrontPeriferals();
+int readFrontPeripherals();    // Corrected spelling by Rusty 9/5/16
 void readIRSensors();
 void incrementSensorSums();
 
 
 
-void setup()
-{
-Serial.begin(9600);
-Wire.begin();
-start = 0; // when first uploaded, queues initialization phase before reading
-/*
-// set pin numbers to Sonic sensors
-frontSensor.setUltraSonicSensorPin(9); // sets pin number to pin 9
-backSensor.setUltraSonicSensorPin(8); // sets pin number to pin 8
-// 9 front cal vals : 13,14
-// 8 back cal vals : 11,12
-*/
-/*
-* A0 Front
-Left
-* A1 Front
-right
-* A2 = Back Right
-* A3 = Back Left
-* A4 =
-* A5CDR:
-WSTF Sniffer 3.0 May 13, 2016 37
-*/
-//set desired Pin numbers to IR Pins
-frontRightSensor.setIRPin(A0);
-frontLeftSensor.setIRPin(A2);
-rightSensor.setIRPin(A1);
-leftSensor.setIRPin(A4);
-backRightSensor.setIRPin(A5);
-backLeftSensor.setIRPin(A0);
-frontSensor.setUltraSonicSensorPin(2);
-backSensor.setUltraSonicSensorPin(3);
-}
+void setup(){    //modified by Rusty 9/5/16
+
+	//*******FIXES***********//
+	// Probed board pins and made pin designations match pin A0-5, 2, & 3
+ 
+	Serial.begin(9600);
+	Wire.begin();
+	start = 0; // when first uploaded, queues initialization phase before reading
+	/*
+	// set pin numbers to Sonic sensors
+	frontSensor.setUltraSonicSensorPin(9); // sets pin number to pin 9
+	backSensor.setUltraSonicSensorPin(8); // sets pin number to pin 8
+	// 9 front cal vals : 13,14
+	// 8 back cal vals : 11,12
+	* A0 = Front Right
+	* A1 = Front Left
+	* A2 = Back Right
+	* A3 = Back Left
+	* A4 = Left
+	* A5 = Right
+	*  2 = US Back
+	*  3 = US Front
+	//
+	CDR:
+	WSTF Sniffer 3.0 May 13, 2016 37
+	*/
+	//set desired Pin numbers to IR Pins
+	frontRightSensor.setIRPin(A0);
+	frontLeftSensor.setIRPin(A1);
+	backRightSensor.setIRPin(A2);
+	backLeftSensor.setIRPin(A3);
+	leftSensor.setIRPin(A4);
+	rightSensor.setIRPin(A5);
+	frontSensor.setUltraSonicSensorPin(3);
+	backSensor.setUltraSonicSensorPin(2);
+}    // end setup()
+
 void loop() {
 	// The supposed index????
 	//int i; // index
@@ -133,72 +137,74 @@ void loop() {
 	delay(200);
 	readIRSensors();
 	incrementSensorSums();
+	// While condition that checks if there is a serial connection or an
+        // obstacle as long as at least one condition is met (G S B R L)
 	while(Serial.available() || isObstacle == true) {
-		if(c != 'G' || c!= 'S' || c!= 'B' || c!= 'R' || c!= 'L')
+		if(c != 'G' || c!= 'S' || c!= 'B' || c!= 'R' || c!= 'L'){
+			//begin by reading the serial port
 			c = Serial.read();
+			//begin driving
 			c = 'G';
-// Master Transimission to arduino 2 (5)
-			if(isObstacle == true) {
-				Wire.beginTransmission(5);
-				Wire.write('S');
-				Wire.endTransmission();
-// read periferal sensors
-// perform majority function
-				decision = readFrontPeriferals();
-				executeDecision(decision);
-				isObstacle = false;
-			}
-			if(c == 'G') {
-				Wire.beginTransmission(5);
-				Wire.write('G');
-				Wire.endTransmission();
-			}
-			if (c == 'S' && isObstacle == false) {
-				Wire.beginTransmission(5);
-				Wire.write('S');
-				Wire.endTransmission();
-				isObstacle = false;
-			}
-if(c == 'B')// backwards
-{
-Wire.beginTransmission(5);
-Wire.write('B');
-Wire.endTransmission();
-}
-if(c == 'R') //Right
-{
-Wire.beginTransmission(5);
-Wire.write('R');
-Wire.endTransmission();
-}
-if(c == 'L')// Left
-{
-Wire.beginTransmission(5);
-Wire.write('L');
-Wire.endTransmission();
-}
-// Master Transimission to arduino 3 (9)
-if(c == 'h')
-{
-Wire.beginTransmission(9);
-Wire.write('H');
-Wire.endTransmission();
-}
-else if(c == 'l')
-{
-Wire.beginTransmission(9);
-Wire.write('L');
-Wire.endTransmission();
-}
-if(isObstacle == false) {
-}
-}
-// else transmit stop
-n = n + 1;
-if (n > 500) {
-	resetSensorSums();
-}
-	// The "Mean" value will vary the whole loop beacuse it isalways calculating the mean with the read values
+		}
+		// Master Transimission to arduino 2 (5)
+		if(isObstacle == true) {    // if there's an obstacle stop
+			Wire.beginTransmission(5);
+			Wire.write('S');
+			Wire.endTransmission();
+			// stop to read peripheral sensors
+			// predefined decision indicates next action
+			decision = readFrontPeripherals();
+			executeDecision(decision);
+			isObstacle = false;    // action performed, now try again
+		}
+		if(c == 'G') {
+			Wire.beginTransmission(5);
+			Wire.write('G');
+			Wire.endTransmission();
+		}
+		if (c == 'S' && isObstacle == false) {
+			Wire.beginTransmission(5);
+			Wire.write('S');
+			Wire.endTransmission();
+			isObstacle = false;
+		}
+		if(c == 'B'){    // backwards
+			Wire.beginTransmission(5);
+			Wire.write('B');
+			Wire.endTransmission();
+		}
+		if(c == 'R'){    //Right
+			Wire.beginTransmission(5);
+			Wire.write('R');
+			Wire.endTransmission();
+		}
+		if(c == 'L'){    // Left
+			Wire.beginTransmission(5);
+			Wire.write('L');
+			Wire.endTransmission();
+		}
+		// Master Transimission to arduino 3 (9)
+		if(c == 'h'){
+			Wire.beginTransmission(9);
+			Wire.write('H');
+			Wire.endTransmission();
+		}
+		else if(c == 'l'){
+			Wire.beginTransmission(9);
+			Wire.write('L');
+			Wire.endTransmission();
+		}
+		if(isObstacle == false) {
+		}
+	// else transmit stop
+	}    // end while loop
+
+	// is this incremental counter supposed to be inside the last if statement?
+	n = n + 1;
+	if (n > 500) {
+		resetSensorSums();
+	}
+	// The "Mean" value will vary the whole loop because it is always calculating the mean with the read values
 	// The "Last Mean" value will only show the calculated mean value just to ease the reading of the calculated value
 	Serial.print("\nFront left sensor Mean = ");
 	Serial.print(mean,DEC);
@@ -215,7 +221,8 @@ if (n > 500) {
 		start = 1;
 	}
 	start++;
-}// end loop
+}// end void loop()
+
 void executeDecision(int n) {
 	switch(n) {
 		case 1:
@@ -332,20 +339,23 @@ void executeDecision(int n) {
 			Wire.endTransmission();
 			delay(2000);
 			break;
-	}
-}
+	}    // end switch
+}    // end executeDecision
 
-int readFrontPeriferals() {
+int readFrontPeripherals() {
 	// if frontLeft occupied
 	if ( mean > lastmean && mean2 == lastmean2) {
 		return 1;
-	} // if frontRight occupied
+	}
+	// if frontRight occupied
 	else if ( mean2 > lastmean2 && mean == lastmean) {
 		return 2;
-	} // if both sensors occupied
+	}
+	// if both sensors occupied
 	else if ( mean2 > lastmean2 && mean > lastmean) {
 		return 3;
-	} // if both open
+	}
+	// if both open
 	else if ( mean2 == lastmean2 && mean == lastmean) {
 		return 1;
 	}
@@ -353,10 +363,13 @@ int readFrontPeriferals() {
 }
 
 void readIRSensors() {
-	frontLeftSensorValue = analogRead(A0);
-	frontRightSensorValue = analogRead(A1);
+	frontRightSensorValue = analogRead(A0);
+	frontLeftSensorValue = analogRead(A1);
 	backRightSensorValue = analogRead(A2);
 	backLeftSensorValue = analogRead(A3);
+	// Rusty adding back in left and right sensors 9/5/16
+	leftSensorValue = analogRead(A4);
+	rightSensorValue = analogRead(A5);
 }
 
 void incrementSensorSums() {
