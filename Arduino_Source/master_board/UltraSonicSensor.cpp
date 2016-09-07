@@ -19,11 +19,10 @@ void UltraSonicSensor::setPulseReader(int pwPin) { //loop
   cm = inches * 2.54;
 }
 void UltraSonicSensor::printSonicReadings() {
-  Serial.print("\nInches: ");
-  Serial.println(inches);
+  Serial.print("Inches: ");
+  Serial.print(inches);
   Serial.print("cm: ");
-  Serial.println(cm);
-  Serial.print("\n\n");
+  Serial.print(cm);
 }
 int UltraSonicSensor::getInPin() {
   return inPin;
