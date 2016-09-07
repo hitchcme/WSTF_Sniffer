@@ -115,23 +115,24 @@ void loop() {
 	frontSensor.setPulseReader(9); // initializes front sensor pulsewidth reading
 	backSensor.setPulseReader(8); // initializes back sensor pulsewidth reading
 
-	/*
+
 	Serial.println("frontSensor: ");
 	frontSensor.printSonicReadings();
-	Serial.println("backSensor: ");
+	Serial.println("    backSensor: ");
 	backSensor.printSonicReadings();
-	*/
+
 
 	bool isObstacle;
 	int frontVal = frontSensor.getInchesValue();
-	Serial.print(frontVal);
+//	Serial.print(frontVal);
 	if(frontVal == 12 || frontVal == 13 || frontVal == 14) {
-		isObstacle = false;
-		Serial.print("\nGoing");
-	}
-	else {
+		// Rusty experimenting to see what happens under true condition
 		isObstacle = true;
 		Serial.print("\nstopping");
+	}
+	else {
+		isObstacle = false;
+		Serial.print("\ngoing");
 	}
 	delay(200);
 	readIRSensors();
@@ -205,15 +206,35 @@ void loop() {
 	}
 	// The "Mean" value will vary the whole loop because it is always calculating the mean with the read values
 	// The "Last Mean" value will only show the calculated mean value just to ease the reading of the calculated value
-	Serial.print("\nFront left sensor Mean = ");
-	Serial.print(mean,DEC);
-	Serial.print(" Last Mean = ");
-	Serial.print(lastmean,DEC);
 
-	Serial.print("\nFront right sensor Mean = ");
-	Serial.print(mean2);
-	Serial.print(" Last Mean = ");
-	Serial.print(lastmean2);
+//	Serial.print("\nFront left sensor Mean = ");
+//	Serial.print(mean,DEC);
+//	Serial.print(" Last Mean = ");
+//	Serial.print(lastmean,DEC);
+
+//	Serial.print("\nFront right sensor Mean = ");
+//	Serial.print(mean2);
+//	Serial.print(" Last Mean = ");
+//	Serial.print(lastmean2);
+	//
+	Serial.print("\nfrontRightSensorValue ");
+	Serial.print(frontRightSensorValue,DEC);
+	Serial.print("    frontLeftSensorValue ");
+	Serial.print(frontLeftSensorValue,DEC);
+	Serial.print("    backRightSensorValue: ");
+	Serial.print(backRightSensorValue,DEC);
+	Serial.print("    backLeftSensorValue: ");
+	Serial.print(backLeftSensorValue,DEC);
+	Serial.print("    leftSensorValue: ");
+	Serial.print(leftSensorValue,DEC);
+	Serial.print("    rightSensorValue: ");
+	Serial.print(rightSensorValue,DEC);
+//	Serial.print("\nfrontSensor ");
+//	frontSensor.printSonicReadings();
+//	Serial.print("    backSensor: ");
+//	backSensor.printSonicReadings();
+//	Serial.print("\n");
+
 	delay(25);
 	if(start > 500) {
 		Serial.println("RESET");
