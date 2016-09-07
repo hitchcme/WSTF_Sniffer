@@ -14,7 +14,7 @@ if [ ! -z $ALL ]; then
 	TARGETS=( $(ls -d */) )
 	for TARGET in "${TARGETS[@]}"; do
 		if [ ! -f "$TARGET"Makefile ]; then
-			echo This Directory doesnt have a Makefile!!!!
+			echo "$TARGET" doesnt have a Makefile!!!!
 			echo I want a damn Makefile, NOW!!!
 		else
 			cd $TARGET
@@ -27,7 +27,7 @@ if [ ! -z $ALL ]; then
 elif [ ! -z $TARGET ]; then
 	echo TARGET: $TARGET
 	if [ ! -f "$TARGET"/Makefile ]; then
-		echo This Directory doesnt have a Makefile!!!!
+		echo "$TARGET" doesnt have a Makefile!!!!
 		echo I want one, immediately!!!
 	else
 		cd $TARGET
