@@ -1,0 +1,37 @@
+#!/bin/bash
+
+TARGET=$1
+TASK=$2
+
+
+ALL_mask=$(echo $TARGET|sed -e 's/[aA][lL][lL]//g')
+
+if [ -z $ALL_mask ] && [ ! -z $TARGET ]; then
+	ALL=1
+fi
+
+if [ ! -z $ALL ]; then
+	TARGETS=( $(ls -d */) )
+	for TARGET in "${TARGETS[@]}"; do
+		if [ ! -f "$TARGET"Makefile ]; then
+			echo This Directory doesnt have a Makefile!!!!
+			echo I want a damn Makefile, NOW!!!
+		else
+			cd $TARGET
+			ls -a
+			make $TASK
+			cd ..
+		fi
+	done
+
+elif [ ! -z $TARGET ]; then
+	echo TARGET: $TARGET
+	if [ ! -f "$TARGET"/Makefile ]; then
+		echo This Directory doesnt have a Makefile!!!!
+		echo I want one, immediately!!!
+	else
+		cd $TARGET
+		make $TASK
+		cd ..
+	fi
+fi
