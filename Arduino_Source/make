@@ -13,6 +13,9 @@ fi
 if [ ! -z $ALL ]; then
 	TARGETS=( $(ls -d */) )
 	for TARGET in "${TARGETS[@]}"; do
+		echo "#############################"
+		echo "# Working in $TARGET"
+		echo "#############################"
 		if [ ! -f "$TARGET"Makefile ]; then
 			echo "$TARGET" doesnt have a Makefile!!!!
 			echo I want a damn Makefile, NOW!!!
@@ -22,6 +25,8 @@ if [ ! -z $ALL ]; then
 			make $TASK
 			cd ..
 		fi
+		echo "Done with $TARGET"
+		echo "#############################"
 	done
 
 elif [ ! -z $TARGET ]; then
