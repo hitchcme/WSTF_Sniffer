@@ -1,6 +1,6 @@
 # WSTF_Sniffer
 WSTF_Sniffer
-*********BASIC DEVELOPING INSTRUCTIONS************/n
+*********BASIC DEVELOPING INSTRUCTIONS************\n
 1) You need to have a GIT BASH shell installed or some other thing maybe Hitch can expand on/n
 2) in order to access the robot while you are here you need an ssh tool installed, simply entering 'ssh' and executing should be/n 
    enough to check, also check for nano text editor again 'nano' then the file name you want to open will confirm this/n
