@@ -21,7 +21,9 @@
 SoftwareSerial gpsSerial(2, 3); // RX, TX (TX not used) digital pins 2,3
 const int sentenceSize = 100;
 // the $GPGGA, $GPGSA, etc. are sentences and are sent 1 character at a time from the GPS
-String sentence = String(100);
+
+//String sentence = String(100);
+
 //char sentence[sentenceSize];
 
 // Function intros
@@ -195,7 +197,7 @@ void displayGPS(){
 
 // parses serial info by field
 void getField(char* buffer, int index){
-
+	String sentence;
 	int sentencePos = 0;
 	int fieldPos = 0;
 	int commaCount = 0;
@@ -222,35 +224,41 @@ void getField(char* buffer, int index){
 
 void readGPS(int i) {
 
+	Serial.print("\nBEGIN: \n");
 	//initialize the variables
 	// the sentence declaration might need further definition, for size
 	// 	and maybe it needs to be removed from the global declarations,
 	//	if it exists globally.
-	String sentence = "";
-	char ch = '\0'
+	String sentence = String(50);
+	char ch = '\0';
 
 	if (gpsSerial.available()) {
 		// Looking for the money!!!
 		// While no money, keep looping
+		Serial.print("While Loop 1: ");
 		while ( ch != 36 ) {
 			ch = gpsSerial.read();
+			Serial.print(ch);
 		}
+		Serial.print("\n");
 		// BAAMMMM!, now we have money!!!
 		sentence += ch; // Append money to empty string
 		ch = gpsSerial.read(); //reset ch, so it doesn't screw up the next bits
 		// While not newline, keep appending the characters
 		//	hopefully we dont miss any characters!
-		while( ch != 10 && ch != 36) {
+		Serial.print("While Loop 2: ");
+		while( ch != 10 && ch != 36 ) {
 			ch = gpsSerial.read();
 			if ( ch != 36 ) {
 				// keeping this inside here, just in case we find money, where we dont want it!
 				sentence += ch;
 			}
 		}
+		Serial.print("\n");
 		// And this should be a complete NMEA sentence
 		Serial.print(sentence);
 		// Add a \n to the sentence, if it doesn't get appended to the sentence
 	}
 
-
+	Serial.print("END: \n");
 } //end readGPS
