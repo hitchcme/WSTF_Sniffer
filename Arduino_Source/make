@@ -10,9 +10,13 @@ if [ -z $ALL_mask ] && [ ! -z $TARGET ]; then
 	ALL=1
 fi
 
+echo "****************************************************************"
+echo "****************************************************************"
+
 if [ ! -z $ALL ]; then
 	TARGETS=( $(ls -d */) )
 	for TARGET in "${TARGETS[@]}"; do
+		echo ""
 		echo "#############################"
 		echo "# Working in $TARGET"
 		echo "#############################"
@@ -23,28 +27,55 @@ if [ ! -z $ALL ]; then
 			cd $TARGET
 			ls -a
 			make $TASK
-			DEVICE=$(cat ./Makefile|grep "port=\|port ="|sed -e 's/=/ /g'|awk '{print $2}')
-			echo Pulling Serial port settings from:
-			echo "\t"$DEVICE
-			stty -a < $DEVICE
+			if [ "$TASK" == "upload" ]; then
+				DEVICE=$(cat ./Makefile|grep "ARDUINO_PORT=\|ARDUINO_PORT = "|sed -e 's/=/ /g'|awk '{print $2}')
+				if [ -f $DEVICE ]; then
+					echo Pulling Serial port settings from:
+					echo "        $DEVICE"
+					stty -a < $DEVICE
+				else
+					echo I dont think $DEVICE
+					echo "    is plugged in!"
+				fi
+			fi
+
 			cd ..
 		fi
 		echo "Done with $TARGET"
 		echo "#############################"
+		echo ""
 	done
 
 elif [ ! -z $TARGET ]; then
-	echo TARGET: $TARGET
+	echo ""
+	echo "#############################"
+	echo "# Working in $TARGET"
+	echo "#############################"
 	if [ ! -f "$TARGET"/Makefile ]; then
 		echo "$TARGET" doesnt have a Makefile!!!!
 		echo I want one, immediately!!!
 	else
 		cd $TARGET
 		make $TASK
-		DEVICE=$(cat ./Makefile|grep "port=\|port ="|sed -e 's/=/ /g'|awk '{print $2}')
-		echo Pulling Serial port settings from:
-		echo "\t"$DEVICE
-		stty -a < $DEVICE
+
+		if [ "$TASK" == "upload" ]; then
+			DEVICE=$(cat ./Makefile|grep "ARDUINO_PORT = \|ARDUINO_PORT="|sed -e 's/=/ /g'|awk '{print $2}')
+			if [ -f $DEVICE ]; then
+				echo Pulling Serial port settings from:
+				echo "        $DEVICE"
+				stty -a < $DEVICE
+			else
+				echo I dont think $DEVICE 
+				echo "    is plugged in!"
+			fi
+		fi
+
 		cd ..
 	fi
+	echo "Done with $TARGET"
+	echo "###############################"
+	echo ""
 fi
+
+echo "****************************************************************"
+echo "****************************************************************"
