@@ -23,6 +23,10 @@ if [ ! -z $ALL ]; then
 			cd $TARGET
 			ls -a
 			make $TASK
+			DEVICE=$(cat ./Makefile|grep "port=\|port ="|sed -e 's/=/ /g'|awk '{print $2}')
+			echo Pulling Serial port settings from:
+			echo "\t"$DEVICE
+			stty -a < $DEVICE
 			cd ..
 		fi
 		echo "Done with $TARGET"
@@ -37,6 +41,10 @@ elif [ ! -z $TARGET ]; then
 	else
 		cd $TARGET
 		make $TASK
+		DEVICE=$(cat ./Makefile|grep "port=\|port ="|sed -e 's/=/ /g'|awk '{print $2}')
+		echo Pulling Serial port settings from:
+		echo "\t"$DEVICE
+		stty -a < $DEVICE
 		cd ..
 	fi
 fi
