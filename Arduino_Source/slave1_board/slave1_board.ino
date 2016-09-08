@@ -222,48 +222,35 @@ void getField(char* buffer, int index){
 
 void readGPS(int i) {
 
-	//while (gpsSerial.connected() ) {
-		String sentence = "";
-		char ch = '\0';
-		while ( gpsSerial.available() ) {
-			//Serial.print("GPS Serial is available\n");
-			char ch = gpsSerial.read();
-			//if ( ch == '$' ) {
-			//	Serial.print("\n");
-			//}
+	//initialize the variables
+	// the sentence declaration might need further definition, for size
+	// 	and maybe it needs to be removed from the global declarations,
+	//	if it exists globally.
+	String sentence = "";
+	char ch = '\0'
 
-			//if ( sentence.length() < 80 ) {
-			sentence += ch;
-
-			if ( ch == 36 && sentence.length() > 0 ) {
-				Serial.print("\n$");
-				return;
-			}
-			//else if ( ch == 92 ) {
-			//	Serial.print(sentence);
-			//	return;
-			//}
-			//}
-			//else {
-			//	Serial.print("\n");
-			//}
-			//else {
-			//	sentence = '\0';
-			//	return;
-			//}
-
-			//if ( ch == '\n' ) {
-			//	Serial.print(sentence);
-
-			//else {
-			//	sentence[i] = '\0';
-			//	i = 0;
-		//		Serial.println("\n");
-		//		Serial.println(sentence);
-		//		Serial.println("\n");
-		//		displayGPS();
-			//}
+	if (gpsSerial.available()) {
+		// Looking for the money!!!
+		// While no money, keep looping
+		while ( ch != 36 ) {
+			ch = gpsSerial.read();
 		}
+		// BAAMMMM!, now we have money!!!
+		sentence += ch; // Append money to empty string
+		ch = gpsSerial.read(); //reset ch, so it doesn't screw up the next bits
+		// While not newline, keep appending the characters
+		//	hopefully we dont miss any characters!
+		while( ch != 10 && ch != 36) {
+			ch = gpsSerial.read();
+			if ( ch != 36 ) {
+				// keeping this inside here, just in case we find money, where we dont want it!
+				sentence += ch;
+			}
+		}
+		// And this should be a complete NMEA sentence
 		Serial.print(sentence);
-	//}
+		// Add a \n to the sentence, if it doesn't get appended to the sentence
+	}
+
+
 } //end readGPS
