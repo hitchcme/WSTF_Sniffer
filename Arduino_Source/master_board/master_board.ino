@@ -74,11 +74,7 @@ void incrementSensorSums();
 
 
 
-void setup(){    //modified by Rusty 9/5/16
-
-	//*******FIXES***********//
-	// Probed board pins and made pin designations match pin A0-5, 2, & 3
-	//
+void setup(){
 	Serial.begin(9600);
 	Wire.begin();
 	start = 0; // when first uploaded, queues initialization phase before reading
@@ -88,6 +84,7 @@ void setup(){    //modified by Rusty 9/5/16
 	backSensor.setUltraSonicSensorPin(8); // sets pin number to pin 8
 	// 9 front cal vals : 13,14
 	// 8 back cal vals : 11,12
+	//
 	* A0 = Front Right
 	* A1 = Front Left
 	* A2 = Back Right
@@ -104,8 +101,8 @@ void setup(){    //modified by Rusty 9/5/16
 	backLeftSensor.setIRPin(A3);
 	leftSensor.setIRPin(A4);
 	rightSensor.setIRPin(A5);
-	frontSensor.setUltraSonicSensorPin(3);
-	backSensor.setUltraSonicSensorPin(2);
+	frontSensor.setUltraSonicSensorPin(2);
+	backSensor.setUltraSonicSensorPin(3);
 }    // end setup()
 
 void loop() {
@@ -114,25 +111,24 @@ void loop() {
 	// read front and back sensor
 	frontSensor.setPulseReader(9); // initializes front sensor pulsewidth reading
 	backSensor.setPulseReader(8); // initializes back sensor pulsewidth reading
-
-
-	Serial.println("frontSensor: ");
-	frontSensor.printSonicReadings();
-	Serial.println("    backSensor: ");
-	backSensor.printSonicReadings();
-
-
 	bool isObstacle;
 	int frontVal = frontSensor.getInchesValue();
-//	Serial.print(frontVal);
+//	#if (DEBUG)
+		Serial.print("HELLO WORLD,");
+//	#endif
 	if(frontVal == 12 || frontVal == 13 || frontVal == 14) {
-		// Rusty experimenting to see what happens under true condition
-		isObstacle = true;
-		Serial.print("\nstopping");
+		isObstacle = false;
+//	#if (DEBUG)
+		Serial.print("False,");
+		Serial.print(frontVal);
+//	#endif
 	}
 	else {
-		isObstacle = false;
-		Serial.print("\ngoing");
+		isObstacle = true;
+//	#if (DEBUG)
+		Serial.print("True,");
+		Serial.print(frontVal);
+//	#endif
 	}
 	delay(200);
 	readIRSensors();
@@ -140,28 +136,31 @@ void loop() {
 	// While condition that checks if there is a serial connection or an
         // obstacle as long as at least one condition is met (G S B R L)
 	while(Serial.available() || isObstacle == true) {
-		if(c != 'G' || c!= 'S' || c!= 'B' || c!= 'R' || c!= 'L'){
-			//begin by reading the serial port
+		Serial.print("WHILE>> BEGIN, ");
+		if( c!= 71 || c!= 83 || c!= 66 || c!= 82 || c!= 76)//G|S|B|R|L
 			c = Serial.read();
-			//begin driving
-			c = 'G';
-		}
-		// Master Transimission to arduino 2 (5)
-		if(isObstacle == true) {    // if there's an obstacle stop
+			c = 71;
+		   // Master Transimission to arduino 2 (5)
+		Serial.print(",STOPIF,");
+		if(isObstacle == true) {   //stop
 			Wire.beginTransmission(5);
 			Wire.write('S');
 			Wire.endTransmission();
-			// stop to read peripheral sensors
-			// predefined decision indicates next action
 			decision = readFrontPeripherals();
 			executeDecision(decision);
-			isObstacle = false;    // action performed, now try again
+			Serial.print(",exec,");
+			Serial.print(decision);
+			isObstacle = false;
 		}
+
+		Serial.print(",GOIF>>,");
 		if(c == 'G') {
 			Wire.beginTransmission(5);
 			Wire.write('G');
 			Wire.endTransmission();
 		}
+
+		Serial.print(",STOPCOMM>>,");
 		if (c == 'S' && isObstacle == false) {
 			Wire.beginTransmission(5);
 			Wire.write('S');
@@ -182,8 +181,8 @@ void loop() {
 			Wire.beginTransmission(5);
 			Wire.write('L');
 			Wire.endTransmission();
-		}
-		// Master Transimission to arduino 3 (9)
+			}
+			// Master Transimission to arduino 3 (9)
 		if(c == 'h'){
 			Wire.beginTransmission(9);
 			Wire.write('H');
@@ -195,10 +194,12 @@ void loop() {
 			Wire.endTransmission();
 		}
 		if(isObstacle == false) {
+			Serial.print("NO OBSTACLE!!");
 		}
+		Serial.print(" IF LOOP ");
 	// else transmit stop
 	}    // end while loop
-
+	Serial.print(",WHILE LOOP, ");
 	// is this incremental counter supposed to be inside the last if statement?
 	n = n + 1;
 	if (n > 500) {
@@ -207,33 +208,40 @@ void loop() {
 	// The "Mean" value will vary the whole loop because it is always calculating the mean with the read values
 	// The "Last Mean" value will only show the calculated mean value just to ease the reading of the calculated value
 
-//	Serial.print("\nFront left sensor Mean = ");
-//	Serial.print(mean,DEC);
-//	Serial.print(" Last Mean = ");
+	Serial.print("\nFLMC,");
+	Serial.print(mean,DEC);
+//	Serial.print(",FLML,");
 //	Serial.print(lastmean,DEC);
-
-//	Serial.print("\nFront right sensor Mean = ");
-//	Serial.print(mean2);
-//	Serial.print(" Last Mean = ");
+	Serial.print(",FRMC,");
+	Serial.print(mean2,DEC);
+//	Serial.print(",FR_ML,");
 //	Serial.print(lastmean2);
-	//
-	Serial.print("\nfrontRightSensorValue ");
+//	Serial.print(",BL_MC,");
+//	Serial.print(mean5,DEC);
+//	Serial.print(",BL_ML,");
+//	Serial.print(lastmean5,DEC);
+//	Serial.print(",BR_MC,");
+//	Serial.print(mean6,DEC);
+//	Serial.print(",BR_ML,");
+//	Serial.print(lastmean6,DEC);
+	Serial.print(",IR_FR,");
 	Serial.print(frontRightSensorValue,DEC);
-	Serial.print("    frontLeftSensorValue ");
+	Serial.print(",IR_FL,");
 	Serial.print(frontLeftSensorValue,DEC);
-	Serial.print("    backRightSensorValue: ");
+	Serial.print(",IR_BR,");
 	Serial.print(backRightSensorValue,DEC);
-	Serial.print("    backLeftSensorValue: ");
+	Serial.print(",IR_BL,");
 	Serial.print(backLeftSensorValue,DEC);
-	Serial.print("    leftSensorValue: ");
+	Serial.print(",IR_LL,");
 	Serial.print(leftSensorValue,DEC);
-	Serial.print("    rightSensorValue: ");
+	Serial.print(",IR_RR,");
 	Serial.print(rightSensorValue,DEC);
-//	Serial.print("\nfrontSensor ");
-//	frontSensor.printSonicReadings();
-//	Serial.print("    backSensor: ");
-//	backSensor.printSonicReadings();
-//	Serial.print("\n");
+	Serial.print(",U_FF,");
+	frontSensor.printSonicReadings();
+	Serial.print(",U_BB,");
+	backSensor.printSonicReadings();
+	Serial.print(",STAT,");
+	Serial.println(c);
 
 	delay(25);
 	if(start > 500) {
@@ -244,7 +252,9 @@ void loop() {
 }// end void loop()
 
 void executeDecision(int n) {
+Serial.println("I EXIST THEREFORE I AM!");
 	switch(n) {
+		Serial.print("\nOkay Lemme Think...\n");
 		case 1:
 			Wire.beginTransmission(5);
 			Wire.write('R');
