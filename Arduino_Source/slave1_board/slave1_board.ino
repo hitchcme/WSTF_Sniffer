@@ -21,7 +21,7 @@
 * GPS
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 SoftwareSerial gpsSerial(2, 3); // RX, TX (TX not used) digital pins 2,3
-const int sentenceSize = 200;
+const int sentenceSize = 100;
 // the $GPGGA, $GPGSA, etc. are sentences and are sent 1 character at a time from the GPS
 
 //String sentence = String(100);
@@ -96,7 +96,7 @@ void receiveEvent(int howMany) {
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 // switch polarity on relay
 void motorLeft(int PWM_val) {
-
+	Serial.print("MoL");
 	analogWrite(PWM1, (PWM_val));
 	analogWrite(PWM2, (PWM_val));
 	digitalWrite(InA2, HIGH);
@@ -107,7 +107,7 @@ void motorLeft(int PWM_val) {
 }
 
 void motorRight(int PWM_val) {
-
+	Serial.print(",MoR,");
 	analogWrite(PWM1, (PWM_val));
 	analogWrite(PWM2, (PWM_val));
 	digitalWrite(InA2, LOW);
@@ -119,7 +119,7 @@ void motorRight(int PWM_val) {
 
 
 void motorForward(int PWM_val) {
-
+	Serial.print(",MoF,");
 	analogWrite(PWM1, PWM_val);
 	analogWrite(PWM2, PWM_val);
 	digitalWrite(InA2, LOW);
@@ -131,7 +131,7 @@ void motorForward(int PWM_val) {
 
 
 void motorBackward(int PWM_val) {
-
+	Serial.print(",MoB,");
 	analogWrite(PWM1, PWM_val);
 	analogWrite(PWM2, PWM_val);
 	digitalWrite(InA1, HIGH);
@@ -143,7 +143,7 @@ void motorBackward(int PWM_val) {
 
 
 void motorStop() {
-
+	Serial.print(",MoS,");
 	analogWrite(PWM1, 0);
 	analogWrite(PWM2, 0);
 	digitalWrite(InA1, LOW);
@@ -155,7 +155,7 @@ void motorStop() {
 
 
 void emergencySoftwareStop(){
-
+	Serial.print(",MoES,");
 	while (true){
 		digitalWrite(RELAY1,HIGH);
 	}
@@ -166,6 +166,7 @@ void emergencySoftwareStop(){
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 * GPS Functions
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/*
 void displayGPS(){
 
 	char field[20];
@@ -194,7 +195,7 @@ void displayGPS(){
 	}
 
 }// end displayGPS
-
+*/
 
 
 // parses serial info by field
@@ -231,7 +232,6 @@ void readGPS(int i) {
 	//	if it exists globally.
 	String sentence;
 	char ch = '\0';
-	Serial.print("G");    // not sure why it's clipping the "G"
 	if (gpsSerial.available()) {
 		// Looking for the money!!!
 		// While no money, keep looping
@@ -252,8 +252,8 @@ void readGPS(int i) {
 			}
 		}
 		// And this should be a complete NMEA sentence
-		Serial.print(sentence);
-		Serial.println();
+//		Serial.print(sentence);
+//		Serial.println();
 		// Add a \n to the sentence, if it doesn't get appended to the sentence
 	}
 } //end readGPS
