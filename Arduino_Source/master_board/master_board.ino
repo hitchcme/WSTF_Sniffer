@@ -113,22 +113,12 @@ void loop() {
 	backSensor.setPulseReader(8); // initializes back sensor pulsewidth reading
 	bool isObstacle;
 	int frontVal = frontSensor.getInchesValue();
-//	#if (DEBUG)
-		Serial.print("HELLO WORLD,");
-//	#endif
+
 	if(frontVal == 12 || frontVal == 13 || frontVal == 14) {
 		isObstacle = false;
-//	#if (DEBUG)
-		Serial.print("False,");
-		Serial.print(frontVal);
-//	#endif
 	}
 	else {
 		isObstacle = true;
-//	#if (DEBUG)
-		Serial.print("True,");
-		Serial.print(frontVal);
-//	#endif
 	}
 	delay(200);
 	readIRSensors();
@@ -136,31 +126,23 @@ void loop() {
 	// While condition that checks if there is a serial connection or an
         // obstacle as long as at least one condition is met (G S B R L)
 	while(Serial.available() || isObstacle == true) {
-		Serial.print("WHILE>> BEGIN, ");
 		if( c!= 71 || c!= 83 || c!= 66 || c!= 82 || c!= 76)//G|S|B|R|L
 			c = Serial.read();
-			c = 71;
+			c = 'G';
 		   // Master Transimission to arduino 2 (5)
-		Serial.print(",STOPIF,");
 		if(isObstacle == true) {   //stop
 			Wire.beginTransmission(5);
 			Wire.write('S');
 			Wire.endTransmission();
 			decision = readFrontPeripherals();
 			executeDecision(decision);
-			Serial.print(",exec,");
-			Serial.print(decision);
 			isObstacle = false;
 		}
-
-		Serial.print(",GOIF>>,");
 		if(c == 'G') {
 			Wire.beginTransmission(5);
 			Wire.write('G');
 			Wire.endTransmission();
 		}
-
-		Serial.print(",STOPCOMM>>,");
 		if (c == 'S' && isObstacle == false) {
 			Wire.beginTransmission(5);
 			Wire.write('S');
@@ -194,12 +176,9 @@ void loop() {
 			Wire.endTransmission();
 		}
 		if(isObstacle == false) {
-			Serial.print("NO OBSTACLE!!");
 		}
-		Serial.print(" IF LOOP ");
 	// else transmit stop
 	}    // end while loop
-	Serial.print(",WHILE LOOP, ");
 	// is this incremental counter supposed to be inside the last if statement?
 	n = n + 1;
 	if (n > 500) {
@@ -208,12 +187,12 @@ void loop() {
 	// The "Mean" value will vary the whole loop because it is always calculating the mean with the read values
 	// The "Last Mean" value will only show the calculated mean value just to ease the reading of the calculated value
 
-	Serial.print("\nFLMC,");
-	Serial.print(mean,DEC);
+//	Serial.print("\nFLMC,");
+//	Serial.print(mean,DEC);
 //	Serial.print(",FLML,");
 //	Serial.print(lastmean,DEC);
-	Serial.print(",FRMC,");
-	Serial.print(mean2,DEC);
+//	Serial.print(",FRMC,");
+//	Serial.print(mean2,DEC);
 //	Serial.print(",FR_ML,");
 //	Serial.print(lastmean2);
 //	Serial.print(",BL_MC,");
@@ -224,7 +203,10 @@ void loop() {
 //	Serial.print(mean6,DEC);
 //	Serial.print(",BR_ML,");
 //	Serial.print(lastmean6,DEC);
-	Serial.print(",IR_FR,");
+//	Serial.print(",IR_FR,");
+	Serial.print("\n*******************************************************************************************\n\n");
+	Serial.print("OUTPUTTING SENSOR VALUES\n");
+	Serial.print("IR_FR,");
 	Serial.print(frontRightSensorValue,DEC);
 	Serial.print(",IR_FL,");
 	Serial.print(frontLeftSensorValue,DEC);
@@ -242,20 +224,21 @@ void loop() {
 	backSensor.printSonicReadings();
 	Serial.print(",STAT,");
 	Serial.println(c);
-
 	delay(25);
+	Serial.print("\n\n******************************************************************************************* \n");
 	if(start > 500) {
-		Serial.println("RESET");
+//		Serial.println("RESET");
 		start = 1;
 	}
 	start++;
 }// end void loop()
 
 void executeDecision(int n) {
-Serial.println("I EXIST THEREFORE I AM!");
 	switch(n) {
-		Serial.print("\nOkay Lemme Think...\n");
 		case 1:
+			Serial.print("\n******************************************************************************************** \n\n");
+			Serial.print("INITIATE DECISION 1\n");
+			Serial.print("R(900) >> S(900) >> G(900) >> L(900) >> G(2000) >> S(2000).");
 			Wire.beginTransmission(5);
 			Wire.write('R');
 			Wire.endTransmission();
@@ -280,8 +263,12 @@ Serial.println("I EXIST THEREFORE I AM!");
 			Wire.write('S');
 			Wire.endTransmission();
 			delay(2000);
+			Serial.print("\n\n******************************************************************************************* \n");
 			break;
 		case 2:
+			Serial.print("\n******************************************************************************************* \n\n");
+			Serial.print("INITIATE DECISION 2\n");
+			Serial.print("L(900) >> S(900) >> G(900) >> R(900) >> G(2000) >> S(2000)");
 			Wire.beginTransmission(5);
 			Wire.write('L');
 			Wire.endTransmission();
@@ -306,8 +293,12 @@ Serial.println("I EXIST THEREFORE I AM!");
 			Wire.write('S');
 			Wire.endTransmission();
 			delay(2000);
+			Serial.print("\n\n******************************************************************************************* \n");
 			break;
 		case 3:
+			Serial.print("\n******************************************************************************************* \n\n");
+			Serial.print("INITIATE DECISION 3\n");
+			Serial.print("B() >> S()");
 			Wire.beginTransmission(5);
 			Wire.write('B');
 			Wire.endTransmission();
@@ -316,8 +307,12 @@ Serial.println("I EXIST THEREFORE I AM!");
 			Wire.write('S');
 			Wire.endTransmission();
 			delay(3000);
+			Serial.print("\n\n******************************************************************************************* \n");
 			break;
 		case 4:
+			Serial.print("\n******************************************************************************************* \n\n");
+			Serial.print("INITIATE DECISION 4\n");
+			Serial.print("R(900) >> S(900) >> G(900) >> L(900) >> G(2000) >> S(2000)");
 			Wire.beginTransmission(5);
 			Wire.write('R');
 			Wire.endTransmission();
@@ -342,8 +337,12 @@ Serial.println("I EXIST THEREFORE I AM!");
 			Wire.write('S');
 			Wire.endTransmission();
 			delay(2000);
+			Serial.print("\n\n******************************************************************************************* \n");
 			break;
 		default:
+			Serial.print("\n******************************************************************************************* \n\n");
+			Serial.print("INITIATE DEFAULT DECISION\n");
+			Serial.print("R(900) >> S(900) >> G(900) >> L(900) >> G(900) >> S(2000)");
 			Wire.beginTransmission(5);
 			Wire.write('R');
 			Wire.endTransmission();
@@ -368,6 +367,7 @@ Serial.println("I EXIST THEREFORE I AM!");
 			Wire.write('S');
 			Wire.endTransmission();
 			delay(2000);
+			Serial.print("\n\n******************************************************************************************* \n");
 			break;
 	}    // end switch
 }    // end executeDecision
