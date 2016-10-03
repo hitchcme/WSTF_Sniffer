@@ -35,7 +35,7 @@ while (1) {
         }
     }
 
-    sleep(3);
+    sleep(1);
 }
 
 /* When you are done... */

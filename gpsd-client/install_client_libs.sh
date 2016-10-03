@@ -3,7 +3,7 @@
 echo -e "Running apt-get, with --assume-yes option to answer yes, to: Are you sure questions"
 echo -e "\n"
 echo "apt-get --assume-yes install libgps-dev"
-#apt-get --assume-yes install libgps-dev
+apt-get --assume-yes install libgps-dev
 
 echo -e "\n"
 echo -e "to compile the example, run: 		Note: Dont just copy and past this.  READ & UNDERSTAND it."
