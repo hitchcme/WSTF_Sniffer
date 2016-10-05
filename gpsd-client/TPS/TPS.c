@@ -18,15 +18,23 @@
 #include <unistd.h>
 #include <math.h>
 
-#define Pi M_PI
-float R = ((360 * 60) / (2 * Pi));
+#define Pi 3.1415926535897932384626433832795029L
+//float R = (float) ((360 * 60) / (2 * Pi));
+
+//sealevel radius at equator
+float r1 = 3443.9184665227f;
+//sealevel radius at poles
+float r2 = 3432.37149028f;
+
 float nmi2ft = 6076.115485564300f;
-float lat1 = 32.89876355058L; 
+float lat1 = 32.89876355058f; 
 float lng1 = -106.15108144756f;
 float bm1 = 5076.583f;
 float lat3 = 33.02400244972f;
 float lng3 = -106.16152893738f;
 float bm3 = 50766.583f;
+float avg_altitude = 4080;
+
 
 typedef struct ByRhA {
 	float By;
@@ -34,19 +42,34 @@ typedef struct ByRhA {
 	float Angle;
 } ByRhA_t;
 
-float radtodeg(float rad);
-ByRhA_t SphCoordDist(float lat1, float lng1, float lat2, float lng2);
 
+float rad2deg(float rad);
+float deg2rad(float deg);
+float Earth_radius_at_sealevel( float lat );
+ByRhA_t SphCoordDist( float R, float lat1, float lng1, float lat2, float lng2);
+
+float R;
 
 int main() {
 
-	printf("Earth Radius: %.6f\n",R);
+	float avg_lat = (float) (lat1 + lat3) / 2;
+	float R = Earth_radius_at_sealevel( avg_lat ) + (avg_altitude / nmi2ft);
+
+	printf("Pi: %f\n",Pi);
+	printf("Earth Radius: %15.6f\n",R);
+	printf("r1: %15.6f,	r2: %15.6f \n",r1,r2);
 	printf("Benchmark: %9.4f, Lat: %15.12f, Lng:%16.12f \n",bm1,lat1,lng1);
 	printf("Benchmark: %9.4f, Lat: %15.12f, Lng:%16.12f \n",bm3,lat3,lng3);
 
 	// By Rh and Angle from Coordinate set 1 to coordinate set 3
-	ByRhA_t ByRhA = SphCoordDist(lat1, lng1, lat3, lng3);
+	ByRhA_t ByRhA = SphCoordDist(R, lat1, lng1, lat3, lng3);
 	printf("By: %15.12f, Rh: %15.12f, angle: %15.12f \n",ByRhA.By,ByRhA.Rh,ByRhA.Angle);
+	float theta12 = deg2rad(ByRhA.By);
+	float d12 = ByRhA.Angle;
+	float Dist12 = ByRhA.Rh;
+
+	float deltaBM = bm3 - bm1;
+        float DistGain = deltaBM / (Dist12 * nmi2ft);
 
 	int rc;
 	struct timeval tv;
@@ -76,6 +99,43 @@ int main() {
 					gettimeofday(&tv, NULL);
 					printf("latitude: %f, longitude: %f, speed: %f, timestamp: %ld\n", gps_data.fix.latitude, gps_data.fix.longitude, gps_data.fix.speed, tv.tv_sec);
 
+					// Calculate relative position
+					float latx = gps_data.fix.latitude;
+					float lngx = gps_data.fix.longitude;
+
+					int STICKYcalc = 0;
+					ByRhA_t ByRhA1;
+					if ( latx > lat1 + (lat3 - lat1) / 2 ) {
+						ByRhA1 = SphCoordDist(R, lat1, lng1, latx, lngx);
+						STICKYcalc = 0;
+					}
+					else {
+						ByRhA1 = SphCoordDist(R, lat3, lng3, latx, lngx);
+						STICKYcalc = 1;
+					}
+					float d13 = ByRhA1.Angle;
+					float theta13 = ByRhA1.By;
+					float Dist13 = ByRhA1.Rh;
+
+					d13 = deg2rad(d13);
+					theta13 = deg2rad(theta13);
+
+					float dxt = asin( ( sin( d13 / R ) ) * ( sin( theta13 - theta12)) ) * R;
+					float dat = acos( ( cos( d13 / R ) ) / ( cos( dxt / R ) )  ) * R;
+
+					float offset = rad2deg( dxt / R) * R * 60 * nmi2ft * DistGain;
+					float TS = rad2deg( dat / R) * R * 60 * nmi2ft * DistGain;
+
+					if (STICKYcalc == 1) {
+						TS = bm3 - TS;
+					}
+					else {
+						TS = bm1 + TS;
+					}
+
+					printf("    TS: %f\n",TS);
+					printf("Offset: %f\n",offset);
+
 				}
 				else {
 					printf("no GPS data available\n");
@@ -83,7 +143,7 @@ int main() {
 			}
 		}
 
-		sleep(3);
+		sleep(0.1);
 	}
 
 /* When you are done... */
@@ -96,22 +156,22 @@ return EXIT_SUCCESS;
 
 
 
-float degtorad(float deg) {
+float deg2rad( float deg ) {
 	return (float) deg * Pi / 180;
 }
 
-float radtodeg(float rad) {
+float rad2deg( float rad ) {
 	return (float) rad / ( Pi / 180);
 }
 
-ByRhA_t  SphCoordDist(float lat1, float lng1, float lat2, float lng2) {
+ByRhA_t  SphCoordDist( float R, float lat1, float lng1, float lat2, float lng2) {
 
 	float dlat = lat2 - lat1;
 
-	float lat1r = degtorad(lat1);
-	float lat2r = degtorad(lat2);
-	float lng1r = degtorad(lng1);
-	float lng2r = degtorad(lng2);
+	float lat1r = deg2rad(lat1);
+	float lat2r = deg2rad(lat2);
+	float lng1r = deg2rad(lng1);
+	float lng2r = deg2rad(lng2);
 
 	float x1 = R * cos(lat1r) * cos(lng1r);
 	float y1 = R * cos(lat1r) * sin(lng1r);
@@ -123,7 +183,7 @@ ByRhA_t  SphCoordDist(float lat1, float lng1, float lat2, float lng2) {
 
 
 	float c = sqrt( pow((x2 - x1),2) + pow((y2 - y1),2) + pow((z2 - z1),2) );
-	float C = radtodeg( acos( (pow(R,2) - 0.5 * pow(c,2)) / (pow(R,2)) ));
+	float C = rad2deg( acos( (pow(R,2) - 0.5 * pow(c,2)) / (pow(R,2)) ));
 
 	float angle = C;
 	float Rh = 60 * C;
@@ -135,11 +195,11 @@ ByRhA_t  SphCoordDist(float lat1, float lng1, float lat2, float lng2) {
 		By = 0;
 	}
 	else {
-		By = radtodeg( acos( dlat / Rh ) );
+		By = rad2deg( acos( dlat / Rh ) );
 	}
 
 
-	By = 90 - radtodeg( atan2( cos(lat1r) * sin(lat2r) - sin(lat1r) * cos(lat2r) * cos( lng2r-lng1r ),
+	By = 90 - rad2deg( atan2( cos(lat1r) * sin(lat2r) - sin(lat1r) * cos(lat2r) * cos( lng2r-lng1r ),
 	    sin( lng2r - lng1r ) * cos( lat2r ) ) );
 
 	By = fmodf((By + 360), 360);
@@ -151,4 +211,16 @@ ByRhA_t  SphCoordDist(float lat1, float lng1, float lat2, float lng2) {
 	ByRhA.Angle = angle;
 
 	return ByRhA;
+}
+
+float Earth_radius_at_sealevel( float lat ) {
+	// https://rechneronline.de/earth-radius/
+	float lrad = deg2rad(lat);
+
+	float A1 = ( r1 * r1 * cos(lrad) ) * ( r1 * r1 * cos(lrad) );
+	float A2 = ( r2 * r2 * sin(lrad) ) * ( r2 * r2 * sin(lrad) );
+	float B1 = ( r1 * cos(lrad) ) * ( r1 * cos(lrad) );
+	float B2 = ( r2 * sin(lrad) ) * ( r2 * sin(lrad) );
+
+	return (float) sqrt( ( A1 + A2 ) / ( B1 + B2 ) );
 }
