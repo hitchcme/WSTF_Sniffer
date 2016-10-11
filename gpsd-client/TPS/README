@@ -1,0 +1,19 @@
+This version reads the base coordinates from a file named /etc/TPS/Settings
+its contents should be coordinate sets on one line, like so:
+LAT1, LNG1, ALT1, FEET_ALONG_TRACK, LAT2, LNG2, ALT2, FEET_ALONG_TRACK2
+
+note:	The only polarity specs to put int the above mentioned file, are "+" or "-",
+	Dont use: N,S,E, or W
+
+note:	The format of those coorinates, for latitude and longitude, shall be degrees,
+	not radians, and not degrees minutes and seconds (DMS).
+
+note:	dont put any units, unless you update the source code to accomodate
+
+
+
+To Compile:
+	gcc ./TPS.c -lm -lgps -lwiringPi -lwiringPiDev -o ./TPS
+
+To run:
+	Look at the above command.  Where did we send the output with the "-o"
